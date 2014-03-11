@@ -3,4 +3,10 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.5.1"]])
+  :dependencies [[compojure "1.1.6"]
+                 [org.clojure/clojure "1.5.1"]
+                 [ring "1.2.1"]]
+  :plugins [[lein-ring "0.8.10"]]
+  :ring {:handler search-clojure-archives.core/handler}
+  :main search-clojure-archives.core
+  )
