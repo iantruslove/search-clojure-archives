@@ -1,14 +1,9 @@
 # search-clojure-archives
 
-A Clojure library designed to ... well, that part is up to you.
+Demo web app searching through some #clojure logs
 
 ## Usage
 
-FIXME
-
-## License
-
-Copyright © 2014 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+* Get yourself an ElasticSearch server. I've been playing with Docker to do this:
+  * `docker pull iant/es_demo`, then `docker run -p 2222:22 -p 9200:9200 -p 9300:9300 -t -i iant/es_demo`
+* Run the Ring server: `lein run <port>`
