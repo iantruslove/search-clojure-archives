@@ -9,12 +9,16 @@
             [ring.util.response :refer [redirect response status]]
             [taoensso.timbre :as timbre]))
 
+(defonce webserver (atom nil))
+
+(defonce es-url (atom nil))
+
 (html/defsnippet result-snippet "templates/message.html"
   [:div#search_results :.message]
-  [{:keys [time author text]}]
-  [:.time] (html/content time)
+  [{:keys [datestamp author message]}]
+  [:.time] (html/content datestamp)
   [:.author] (html/content author)
-  [:.text] (html/content text))
+  [:.text] (html/content message))
 
 (html/deftemplate page-template "templates/page.html"
   [results]
@@ -25,8 +29,8 @@
   (GET "/messages" [author term] (str "Looking for messages with author " author ", term " term)))
 
 (defn search [query]
-  [{:time "12.34" :author "ian" :text query}
-   {:time "12.35" :author "ian" :text "foo again"}])
+  (es/search {:url @es-url
+              :query query}))
 
 (defroutes handler
   (handler/api
@@ -35,10 +39,6 @@
       (resource/wrap-resource "public")
       handler/api)
   (route/not-found (-> "sorry, nothing to see here" response (status 404))))
-
-(defonce webserver (atom nil))
-
-(defonce es-url (atom nil))
 
 (defn stop-webserver! []
   (when @webserver
