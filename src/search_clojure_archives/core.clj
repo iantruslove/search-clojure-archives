@@ -7,7 +7,8 @@
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.resource :as resource]
             [ring.util.response :refer [redirect response status]]
-            [taoensso.timbre :as timbre]))
+            [taoensso.timbre :as timbre])
+  (:gen-class))
 
 (defonce webserver (atom nil))
 

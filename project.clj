@@ -13,4 +13,5 @@
   :resource-paths ["resources"]
   :ring {:handler search-clojure-archives.core/handler}
   :main search-clojure-archives.core
+  :profiles {:uberjar {:aot :all}}
   )
