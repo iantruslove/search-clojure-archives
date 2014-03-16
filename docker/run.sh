@@ -8,7 +8,7 @@ ES_HOST=${ES_HOST:-"$ELASTICSEARCH_PORT_9200_TCP_ADDR"}
 ES_PORT=${ES_PORT:-"$ELASTICSEARCH_PORT_9200_TCP_PORT"}
 [[ -z "$ES_PORT" ]] && echo "Error: ES_PORT not set" && exit 1
 
-for file in "BASEDIR/target"/*standalone.jar; do
+for file in "$BASEDIR/target"/*standalone.jar; do
     [[ $file -nt $jar ]] && jar=$file
 done
 
