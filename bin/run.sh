@@ -21,6 +21,5 @@ JAVACMD=`which java`
 LEIN_ROOT=true ES_HOST=$ES_HOST ES_PORT=$ES_PORT \
     $JAVACMD \
     $JAVA_OPTS $EXTRA_JVM_ARGUMENTS \
-    -XX:PermSize=256m -XX:MaxPermSize=256m \
     -jar "$JAR" \
     "$@"
