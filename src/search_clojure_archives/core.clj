@@ -1,13 +1,13 @@
 (ns search-clojure-archives.core
   (:require [search-clojure-archives.es :as es]
+            [clojure.tools.logging :as log]
             [compojure.core :refer :all]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [net.cgrand.enlive-html :as html]
             [ring.adapter.jetty :refer [run-jetty]]
             [ring.middleware.resource :as resource]
-            [ring.util.response :refer [redirect response status]]
-            [taoensso.timbre :as timbre])
+            [ring.util.response :refer [redirect response status]])
   (:gen-class))
 
 (defonce webserver (atom nil))
@@ -27,26 +27,28 @@
                          (map result-snippet results)))
 
 (defroutes search-handler
-  (GET "/messages" [author term] (str "Looking for messages with author " author ", term " term)))
+  (GET "/messages" [author term]
+       (str "Looking for messages with author " author ", term " term)))
 
 (defn search [query]
+  (log/debug (format "Search: q=%s" query))
   (es/search {:url @es-url
               :query query}))
 
 (defroutes handler
-  (handler/api
-   (GET "/" [q]  (page-template (search q))))
-  (-> search-handler
-      (resource/wrap-resource "public")
-      handler/api)
+  (-> (GET "/" [q] (page-template (search q)))
+      handler/api
+      (resource/wrap-resource "public"))
   (route/not-found (-> "sorry, nothing to see here" response (status 404))))
 
 (defn stop-webserver! []
   (when @webserver
+    (log/debug "Stopping webserver...")
     (swap! webserver (fn [jetty] (.stop jetty)))))
 
 (defn start-webserver! [port]
   (when-not @webserver
+    (log/debug "Starting webserver, port" port)
     (reset! webserver (run-jetty #'handler {:port port :join? false}))))
 
 (defn -main
@@ -65,10 +67,13 @@
                                          "9200"))
         elasticsearch-url (format "http://%s:%d/" elasticsearch-host elasticsearch-port)]
     (try
+      (log/info 3#3 3#3 "Connecting to ElasticSearch server at" elasticsearch-url)
       (reset! es-url elasticsearch-url)
       (let [state (:status (es/cluster-stats @es-url))]
-        (when-not (= "green" state)
-          (throw (Exception. "Oh dear, cluster state is" state))))
+        (log/debug "ElasticSearch cluster state:" state)
+        (when (= "red" state)
+          (throw (Exception. (str "Oh dear, cluster state is " state)))))
       (catch Exception e
-        (timbre/error "Problem querying ElasticSearch cluster status at" @es-url ":" (.getMessage e))))
-    (start-webserver! webserver-port)))
+        (log/error e "Problem querying ElasticSearch cluster status at" @es-url ":" (.getMessage e))))
+    (start-webserver! webserver-port)
+    (log/info "Webserver started.")))
