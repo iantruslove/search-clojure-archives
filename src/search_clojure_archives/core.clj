@@ -57,8 +57,12 @@
   and ES_PORT.  Defaults are localhost and 9200 respectively."
   [& [port]]
   (let [webserver-port (Integer. (or port (System/getenv "PORT") "8080"))
-        elasticsearch-host (or (System/getenv "ES_HOST") "localhost")
-        elasticsearch-port (Integer. (or (System/getenv "ES_PORT") "9200"))
+        elasticsearch-host (or (System/getenv "ELASTICSEARCH_PORT_9200_TCP_ADDR")
+                               (System/getenv "ES_HOST")
+                               "localhost")
+        elasticsearch-port (Integer. (or (System/getenv "ELASTICSEARCH_PORT_9200_TCP_PORT")
+                                         (System/getenv "ES_PORT")
+                                         "9200"))
         elasticsearch-url (format "http://%s:%d/" elasticsearch-host elasticsearch-port)]
     (try
       (reset! es-url elasticsearch-url)
