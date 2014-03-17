@@ -1,55 +1,24 @@
-FROM ubuntu:latest
+# clojure-search-archives
+#
+# Dependencies:
+# - ElasticSearch server, either:
+#   - As a docker link with a container named "elasticsearch" exposing port 9200
+#     (via env var `ELASTICSEARCH_PORT_9200`)
+#  - via `ES_PORT` and `ES_HOST` env vars
 
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get upgrade -y
+FROM iant/clojure:0.1.0
 
-# RUN apt-get install -y openssh-server supervisor
-# RUN mkdir -p /var/run/sshd
-# RUN mkdir -p /var/log/supervisor
-
-RUN apt-get install -y python-software-properties software-properties-common
-RUN add-apt-repository -y ppa:webupd8team/java
-RUN apt-get update
-RUN echo debconf shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-RUN echo debconf shared/accepted-oracle-license-v1-1 seen true | debconf-set-selections
-RUN apt-get install -y oracle-java7-installer
-
-# # Install ElasticSearch.
-# RUN wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
-# RUN echo "deb http://packages.elasticsearch.org/elasticsearch/1.0/debian stable main" >> /etc/apt/sources.list
-# RUN apt-get update
-# RUN apt-get install -y elasticsearch
-
-# Install curl
-RUN apt-get install -y curl
-
-# ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# RUN echo 'root:pass' |chpasswd
-# RUN /bin/echo -e "LANG=\"en_US.UTF-8\"" > /etc/default/locale
-
-# EXPOSE 22
-
-# # Prevent elasticsearch calling `ulimit`.
-# RUN sed -i 's/MAX_OPEN_FILES=/# MAX_OPEN_FILES=/g' /etc/init.d/elasticsearch
-
-# Install lein
-RUN wget https://raw.github.com/technomancy/leiningen/stable/bin/lein -O /usr/local/bin/lein
-RUN chmod a+x /usr/local/bin/lein
-
-# Install git
-RUN apt-get install -y git
+MAINTAINER Ian Truslove "ian.truslove@gmail.com"
 
 # Download app sources
-RUN git clone https://github.com/iantruslove/search-clojure-archives.git /usr/local/src/search-clojure-archives.git
+RUN git clone https://github.com/iantruslove/search-clojure-archives.git /usr/local/src/search-clojure-archives
 
 # Precompile sources
-RUN cd /usr/local/src/search-clojure-archives.git && lein uberjar 
+RUN mkdir -p /usr/local/src/search-clojure-archives
+WORKDIR /usr/local/src/search-clojure-archives
+RUN LEIN_ROOT=true lein uberjar
 
 EXPOSE 80
 
-ADD docker/run.sh /usr/local/bin/run.sh
-RUN chmod a+x /usr/local/bin/run.sh
-
-# CMD ["lein run 80"]
+ENV BASEDIR /usr/local/src/search-clojure-archives
+CMD ["java", "-jar", "target/search-clojure-archives-0.0.1-standalone.jar", "80"]
