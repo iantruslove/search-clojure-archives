@@ -67,7 +67,7 @@
                                          "9200"))
         elasticsearch-url (format "http://%s:%d/" elasticsearch-host elasticsearch-port)]
     (try
-      (log/info 3#3 3#3 "Connecting to ElasticSearch server at" elasticsearch-url)
+      (log/info "Connecting to ElasticSearch server at" elasticsearch-url)
       (reset! es-url elasticsearch-url)
       (let [state (:status (es/cluster-stats @es-url))]
         (log/debug "ElasticSearch cluster state:" state)
